@@ -65,11 +65,11 @@
         </svg>
         <span>借阅信息</span>
       </el-menu-item>
-      <el-menu-item index="/bookwithuser">
+      <el-menu-item index="/Recommdation">
         <el-icon>
           <grid/>
         </el-icon>
-        <span>借阅状态</span>
+        <span>推荐信息</span>
       </el-menu-item>
     </el-menu>
 

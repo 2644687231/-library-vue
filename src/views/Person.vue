@@ -3,18 +3,15 @@
     <el-card style="width: 40%; margin-left: 120px; margin-top: 40px">
       <h2 style="padding: 30px">个人信息</h2>
       <el-form :model="form" ref="form" label-width="80px">
+        <el-form-item label="权限">
+          <span v-if="form.role==1" style="font-size: 18px;">管理员</span>
+          <span v-if="form.role==2" style="font-size: 18px;">读者</span>
+        </el-form-item>
         <el-form-item label="用户名">
           <el-input style="width: 80%" v-model="form.userid" disabled></el-input>
         </el-form-item>
         <el-form-item label="姓名">
-          <el-input style="width: 80%" v-model="form.userid"></el-input>
-        </el-form-item>
-        <el-form-item label="权限">
-          <span v-if="form.role==1" style="margin:5px">管理员</span>
-          <span v-if="form.role==2" style="margin:5px">读者</span>
-        </el-form-item>
-        <el-form-item label="电话号码">
-          <el-input style="width: 80%" v-model="form.phone"></el-input>
+          <el-input style="width: 80%" v-model="form.username"></el-input>
         </el-form-item>
         <el-form-item label="性别">
           <div>
@@ -22,11 +19,14 @@
             <el-radio v-model="form.sex" label="女">女</el-radio>
           </div>
         </el-form-item>
+        <el-form-item label="电话号码">
+          <el-input style="width: 80%" v-model="form.phone"></el-input>
+        </el-form-item>
         <el-form-item label="学院">
-          <el-input v-model="form.dept"></el-input>
+          <el-input style="width: 80%" v-model="form.dept"></el-input>
         </el-form-item>
         <el-form-item label="专业">
-          <el-input v-model="form.occupation"></el-input>
+          <el-input style="width: 80%" v-model="form.occupation"></el-input>
         </el-form-item>
         <el-form-item label="地址">
           <el-input type="textarea" style="width: 80%" v-model="form.address"></el-input>
@@ -52,19 +52,19 @@ export default {
   },
   created() {
     let str = sessionStorage.getItem("user") || "{}"
-    console.log(str)
     this.form = JSON.parse(str)
-    console.log(this.form)
   },
   methods: {
     update() {
       request.put("/Userinformation/update", this.form).then(res => {
         console.log(res)
-        if (res.code === '0') {
+        if (res.code === 0) {
           ElMessage.success("更新成功")
-          sessionStorage.setItem("user", JSON.stringify(this.form))
-          // 触发Layout更新用户信息
-          this.$emit("userInfo")
+          sessionStorage.setItem("user", JSON.stringify(this.form));
+          request.get("Userinformation/userinformation/" + this.form.userid).then(res => {
+            this.form = res.data;
+            sessionStorage.setItem("user", JSON.stringify(res.data))//缓存用户信息
+          })
         } else {
           ElMessage.error(res.msg)
         }

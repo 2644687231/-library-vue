@@ -2,9 +2,9 @@
   <div class="home" style="padding: 10px">
     <!-- 搜索-->
     <div style="margin: 10px 0;">
-      <el-form inline="true" size="small">
+      <el-form :model="paramsForm" inline="true" size="small">
         <el-form-item label="图书编号">
-          <el-input v-model="search1" placeholder="请输入图书编号" clearable>
+          <el-input v-model="paramsForm.bookId" placeholder="请输入图书编号" clearable>
             <template #prefix>
               <el-icon class="el-input__icon">
                 <search/>
@@ -13,7 +13,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="图书名称">
-          <el-input v-model="search2" placeholder="请输入图书名称" clearable>
+          <el-input v-model="paramsForm.title" placeholder="请输入图书名称" clearable>
             <template #prefix>
               <el-icon class="el-input__icon">
                 <search/>
@@ -22,7 +22,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="作者">
-          <el-input v-model="search3" placeholder="请输入作者" clearable>
+          <el-input v-model="paramsForm.author" placeholder="请输入作者" clearable>
             <template #prefix>
               <el-icon class="el-input__icon">
                 <search/>
@@ -51,8 +51,8 @@
     </div>
     <!-- 按钮-->
     <div style="margin: 10px 0;">
-      <el-button type="primary" @click="add" v-if="user.role == 1">上架</el-button>
-      <el-popconfirm title="确认删除?" @confirm="deleteBatch" v-if="user.role == 1">
+      <el-button type="primary" @click="add" v-if="user.role === 1">上架</el-button>
+      <el-popconfirm title="确认删除?" @confirm="deleteBatch" v-if="user.role === 1">
         <template #reference>
           <el-button type="danger" size="mini">批量删除</el-button>
         </template>
@@ -60,45 +60,46 @@
     </div>
     <!-- 数据字段-->
     <el-table :data="tableData" stripe border="true" @selection-change="handleSelectionChange">
-      <el-table-column v-if="user.role == 1" type="selection" width="55">
+      <el-table-column v-if="user.role === 1" type="selection" width="55">
       </el-table-column>
+      <el-table-column prop="isbn" label="ISBN" sortable/>
       <el-table-column prop="bookId" label="图书编号" sortable/>
       <el-table-column prop="title" label="图书名称"/>
       <el-table-column prop="pubYear" label="价格" sortable/>
       <el-table-column prop="author" label="作者"/>
       <el-table-column prop="publisher" label="出版社"/>
-      <el-table-column prop="createTime" label="出版时间" sortable/>
+      <el-table-column prop="pubYear" label="出版时间" sortable/>
       <el-table-column prop="status" label="状态">
         <template v-slot="scope">
-          <el-tag v-if="scope.row.status == 0" type="warning">已借阅</el-tag>
+          <el-tag v-if="scope.row.status === 0" type="warning">已借阅</el-tag>
           <el-tag v-else type="success">未借阅</el-tag>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作">
         <template v-slot="scope">
-          <el-button size="mini" @click="handleEdit(scope.row)" v-if="user.role == 1">修改</el-button>
-          <el-popconfirm title="确认删除?" @confirm="handleDelete(scope.row.id)" v-if="user.role == 1">
+          <el-button size="mini" @click="handleEdit(scope.row)" v-if="user.role === 1">修改</el-button>
+          <el-popconfirm title="确认删除?" @confirm="handleDelete(scope.row.bookId)" v-if="user.role === 1">
             <template #reference>
               <el-button type="danger" size="mini">删除</el-button>
             </template>
           </el-popconfirm>
           <el-button size="mini" @click="handlelend(scope.row.id, scope.row.isbn, scope.row.name, scope.row.borrownum)"
-                     v-if="user.role == 2" :disabled="scope.row.status == 0">借阅
+                     v-if="user.role === 2" :disabled="scope.row.status === 0">借阅
           </el-button>
           <el-popconfirm title="确认还书?" @confirm="handlereturn(scope.row.id, scope.row.isbn, scope.row.borrownum)"
-                         v-if="user.role == 2" :disabled="scope.row.status == 1">
+                         v-if="user.role === 2" :disabled="scope.row.status === 1">
             <template #reference>
               <el-button type="danger" size="mini"
-                         :disabled="(this.isbnArray.indexOf(scope.row.isbn)) == -1 || scope.row.status == 1">还书
+                         :disabled="(this.isbnArray.indexOf(scope.row.isbn)) === -1 || scope.row.status === 1">还书
               </el-button>
             </template>
           </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
+
     <!--测试,通知对话框-->
-    <el-dialog v-model="dialogVisible3" v-if="numOfOutDataBook != 0" title="逾期详情" width="50%"
-               :before-close="handleClose">
+    <el-dialog v-model="dialogVisible3" v-if="numOfOutDataBook != 0" title="逾期详情" width="50%">
       <el-table :data="outDateBook" style="width: 100%">
         <el-table-column prop="isbn" label="图书编号"/>
         <el-table-column prop="bookName" label="书名"/>
@@ -112,21 +113,21 @@
         </span>
       </template>
     </el-dialog>
+
     <!--    分页-->
     <div style="margin: 10px 0">
-      <el-pagination :current-page="currentPage" :page-sizes="[5, 10, 20]" :page-size="pageSize"
+      <el-pagination :current-page="currentPage" :page-sizes="[5, 10, 20, 50]" :page-size="pageSize"
                      layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
                      @current-change="handleCurrentChange">
       </el-pagination>
 
-      <el-dialog v-model="dialogVisible" title="上架书籍" width="30%">
+      <el-dialog v-model="dialogVisible" title="上架书籍" width="60%">
         <el-form :model="form" label-width="120px">
-
           <el-form-item label="图书编号">
             <el-input style="width: 80%" v-model="form.isbn"></el-input>
           </el-form-item>
           <el-form-item label="图书名称">
-            <el-input style="width: 80%" v-model="form.name"></el-input>
+            <el-input style="width: 80%" v-model="form.title"></el-input>
           </el-form-item>
           <el-form-item label="价格">
             <el-input style="width: 80%" v-model="form.price"></el-input>
@@ -138,10 +139,7 @@
             <el-input style="width: 80%" v-model="form.publisher"></el-input>
           </el-form-item>
           <el-form-item label="出版时间">
-            <div>
-              <el-date-picker value-format="YYYY-MM-DD" type="date" style="width: 80%" clearable
-                              v-model="form.createTime"></el-date-picker>
-            </div>
+            <el-input style="width: 80%" v-model="form.pubYear"></el-input>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -152,14 +150,13 @@
         </template>
       </el-dialog>
 
-      <el-dialog v-model="dialogVisible2" title="修改书籍信息" width="30%">
+      <el-dialog v-model="dialogVisible2" title="修改书籍信息" width="60%">
         <el-form :model="form" label-width="120px">
-
           <el-form-item label="图书编号">
             <el-input style="width: 80%" v-model="form.isbn"></el-input>
           </el-form-item>
           <el-form-item label="图书名称">
-            <el-input style="width: 80%" v-model="form.name"></el-input>
+            <el-input style="width: 80%" v-model="form.title"></el-input>
           </el-form-item>
           <el-form-item label="价格">
             <el-input style="width: 80%" v-model="form.price"></el-input>
@@ -171,10 +168,7 @@
             <el-input style="width: 80%" v-model="form.publisher"></el-input>
           </el-form-item>
           <el-form-item label="出版时间">
-            <div>
-              <el-date-picker value-format="YYYY-MM-DD" type="date" style="width: 80%" clearable
-                              v-model="form.createTime"></el-date-picker>
-            </div>
+            <el-input style="width: 80%" v-model="form.pubYear"></el-input>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -194,6 +188,30 @@ import {ElMessage} from "element-plus";
 import moment from "moment";
 
 export default {
+  data() {
+    return {
+      form: {},
+      form2: {},
+      form3: {},
+      dialogVisible: false,
+      dialogVisible2: false,
+      search1: '',
+      search2: '',
+      search3: '',
+      total: 10,
+      currentPage: 1,
+      pageSize: 10,
+      tableData: [],
+      user: {},
+      number: 0,
+      bookData: [],
+      isbnArray: [],
+      outDateBook: [],
+      numOfOutDataBook: 0,
+      dialogVisible3: true,
+      paramsForm: {},
+    }
+  },
   created() {
     let userStr = sessionStorage.getItem("user") || "{}"
     this.user = JSON.parse(userStr)
@@ -201,7 +219,6 @@ export default {
   },
   name: 'Book',
   methods: {
-    // (this.isbnArray.indexOf(scope.row.isbn)) == -1
     handleSelectionChange(val) {
       this.ids = val.map(v => v.id)
     },
@@ -227,9 +244,7 @@ export default {
         params: {
           pageNum: this.currentPage,
           pageSize: this.pageSize,
-          search1: this.search1,
-          search2: this.search2,
-          search3: this.search3,
+          ...this.paramsForm,
         }
       }).then(res => {
         console.log(res)
@@ -238,16 +253,13 @@ export default {
       })
     },
     clear() {
-      this.search1 = ""
-      this.search2 = ""
-      this.search3 = ""
+      this.paramsForm = {}
       this.load()
     },
-
     handleDelete(id) {
       request.delete("book/" + id).then(res => {
         console.log(res)
-        if (res.code == 0) {
+        if (res.code === 0) {
           ElMessage.success("删除成功")
         } else
           ElMessage.error(res.msg)
@@ -255,19 +267,11 @@ export default {
       })
     },
     handlereturn(id, isbn, bn) {
-      // (this.isbnArray.indexOf(scope.row.isbn)) == -1
-      // for(let i=0; i<this.numOfOutDataBook; i++){
-      //   if(this.outDateBook[i].isbn == isbn){
-      //     this.numOfOutDataBook = this.numOfOutDataBook -1;
-      //     console.log("in handlereturn: " + this.numOfOutDataBook);
-      //     break;
-      //   }
-      // }
       this.form.status = "1"
       this.form.id = id
       request.put("/book", this.form).then(res => {
         console.log(res)
-        if (res.code == 0) {
+        if (res.code === 0) {
           ElMessage({
             message: '还书成功',
             type: 'success',
@@ -297,35 +301,11 @@ export default {
             console.log(res)
             this.load()
           })
-
         })
-        //
       })
-      // this.form3.isbn = isbn
-      // this.form3.readerId = this.user.id
-      // let endDate = moment(new Date()).format("yyyy-MM-DD HH:mm:ss")
-      // this.form3.returnTime = endDate
-      // this.form3.status = "1"
-      // console.log(bn)
-      // this.form3.borrownum = bn
-      // request.put("/LendRecord1/",this.form3).then(res =>{
-      //   console.log(res)
-      // })
-      // let form3 ={};
-      // form3.isbn = isbn;
-      // form3.bookName = name;
-      // form3.nickName = this.user.username;
-      // form3.id = this.user.id;
-      // form3.lendtime = endDate;
-      // form3.deadtime = endDate;
-      // form3.prolong  = 1;
-      // request.post("/bookwithuser/deleteRecord",form3).then(res =>{
-      //   console.log(res)
-      //   this.load()
-      // })
     },
     handlelend(id, isbn, name, bn) {
-      if (this.number == 5) {
+      if (this.number === 5) {
         ElMessage.warning("您不能再借阅更多的书籍了")
         return;
       }
@@ -339,7 +319,7 @@ export default {
       console.log(bn)
       request.put("/book", this.form).then(res => {
         console.log(res)
-        if (res.code == 0) {
+        if (res.code === 0) {
           ElMessage({
             message: '借阅成功',
             type: 'success',
@@ -374,7 +354,7 @@ export default {
       nowDate.setDate(nowDate.getDate() + 30);
       form3.deadtime = moment(nowDate).format("yyyy-MM-DD HH:mm:ss");
       form3.prolong = 1;
-      request.post("/bookwithuser/insertNew", form3).then(res => {
+      request.post("/book", form3).then(res => {
         console.log(res)
         this.load()
       })
@@ -384,13 +364,9 @@ export default {
       this.form = {}
     },
     save() {
-      //ES6语法
-      //地址,但是？IP与端口？+请求参数
-      // this.form?这是自动保存在form中的，虽然显示时没有使用，但是这个对象中是有它的
-      if (this.form.id) {
+      if (this.form.bookId) {
         request.put("/book", this.form).then(res => {
-          console.log(res)
-          if (res.code == 0) {
+          if (res.code === 0) {
             ElMessage({
               message: '修改书籍信息成功',
               type: 'success',
@@ -405,9 +381,9 @@ export default {
       } else {
         this.form.borrownum = 0
         this.form.status = 1
+        console.log(this.form)
         request.post("/book", this.form).then(res => {
-          console.log(res)
-          if (res.code == 0) {
+          if (res.code === 0) {
             ElMessage.success('上架书籍成功')
           } else {
             ElMessage.error(res.msg)
@@ -416,13 +392,9 @@ export default {
           this.dialogVisible = false
         })
       }
-
     },
-    // formatter(row) {:formatter="formatter"
-    //   return row.address
-    // },
-
     handleEdit(row) {
+      console.log(row)
       this.form = JSON.parse(JSON.stringify(row))
       this.dialogVisible2 = true
     },
@@ -437,29 +409,6 @@ export default {
     toLook() {
       this.dialogVisible3 = true;
     },
-  },
-  data() {
-    return {
-      form: {},
-      form2: {},
-      form3: {},
-      dialogVisible: false,
-      dialogVisible2: false,
-      search1: '',
-      search2: '',
-      search3: '',
-      total: 10,
-      currentPage: 1,
-      pageSize: 10,
-      tableData: [],
-      user: {},
-      number: 0,
-      bookData: [],
-      isbnArray: [],
-      outDateBook: [],
-      numOfOutDataBook: 0,
-      dialogVisible3: true,
-    }
   },
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-card style="width: 40%; margin-left: 120px; margin-top: 40px" >
+    <el-card style="width: 40%; margin-left: 120px; margin-top: 40px">
       <el-form
           ref="form"
           :model="form"
@@ -79,31 +79,29 @@ export default {
       form: {
         password2: '',
         checkpassword: '',
-        truepassword:'',
+        truepassword: '',
       },
-      form2:{
-        password:'',
-        id:0
+      form2: {
+        password: '',
+        id: 0
       },
       rules: {
-        password: [{ validator: validatePass, trigger: 'blur' ,required: true}],
-        checkpassword: [{ validator: validatePass3, trigger: 'blur',required: true,}],
-        password2: [{ validator: validatePass2, trigger: 'blur',required: true,}],
+        password: [{validator: validatePass, trigger: 'blur', required: true}],
+        checkpassword: [{validator: validatePass3, trigger: 'blur', required: true,}],
+        password2: [{validator: validatePass2, trigger: 'blur', required: true,}],
       },
     }
   },
   created() {
     let user = JSON.parse(sessionStorage.getItem("user"))
     this.form.truepassword = user.password
-    this.form2.id = user.id
-
+    this.form2.userid = user.userid
   },
   methods: {
     submitForm() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
-
-          request.put("/user", this.form2).then(res => {
+          request.put("/forgetPwd", this.form2).then(res => {
             if (res.code == 0) {
               ElMessage.success("密码修改成功,请重新登录")
               sessionStorage.removeItem("user")//清空缓存的用户信息

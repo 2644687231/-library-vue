@@ -39,9 +39,9 @@ const routes = [
                 component: () => import("@/views/Dashboard")
             },
             {
-                path: 'bookwithuser',
-                name: 'BookWithUser',
-                component: () => import("@/views/BookWithUser")
+                path: 'Recommdation',
+                name: 'Recommdation',
+                component: () => import("@/views/Recommdation.vue")
             }
         ]
     },

@@ -127,9 +127,6 @@ export default {
       }, 1000)
     },
     getTimer() {
-      var d = new Date()
-      var t = d.toLocaleString()
-      document.getElementById('myTimer').innerHTML = t
     }
   }
 }
