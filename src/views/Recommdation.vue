@@ -168,25 +168,6 @@ export default {
         this.load()
       })
     },
-    handlereProlong(row) {
-      var nowDate = new Date(row.deadtime);
-      nowDate.setDate(nowDate.getDate() + 30);
-      row.deadtime = moment(nowDate).format("yyyy-MM-DD HH:mm:ss");
-      row.prolong = row.prolong - 1;
-      request.post("/Recommdation", row).then(res => {
-        console.log(res)
-        if (res.code === 0) {
-          ElMessage({
-            message: '续借成功',
-            type: 'success',
-          })
-        } else {
-          ElMessage.error(res.msg)
-        }
-        this.load()
-        this.dialogVisible2 = false
-      })
-    },
     save() {
       //ES6语法
       //地址,但是？IP与端口？+请求参数
@@ -205,7 +186,6 @@ export default {
         this.dialogVisible2 = false
       })
     },
-
     handleEdit(row) {
       this.form = JSON.parse(JSON.stringify(row))
       this.dialogVisible2 = true

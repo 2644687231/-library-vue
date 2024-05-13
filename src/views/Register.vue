@@ -1,25 +1,31 @@
 <template>
-<div  class="login-container"  >
-    <el-form ref="form" :model="form"    :rules="rules" class="login-page">
+  <div class="login-container">
+    <el-form ref="form" :model="form" :rules="rules" class="login-page">
       <h2 class="title" style="margin-bottom: 20px">用户注册</h2>
-      <el-form-item prop="username" >
-        <el-input v-model="form.username" placeholder="请输入用户名" clearable >
+      <el-form-item prop="username">
+        <el-input v-model="form.username" placeholder="请输入用户名" clearable>
           <template #prefix>
-            <el-icon class="el-input__icon"><User/></el-icon>
+            <el-icon class="el-input__icon">
+              <User/>
+            </el-icon>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input v-model="form.password"  placeholder="请输入密码" clearable show-password>
+        <el-input v-model="form.password" placeholder="请输入密码" clearable show-password>
           <template #prefix>
-            <el-icon class="el-input__icon"><Lock /></el-icon>
+            <el-icon class="el-input__icon">
+              <Lock/>
+            </el-icon>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item prop="confirm">
         <el-input v-model="form.confirm" placeholder="请再次确认密码" clearable show-password>
           <template #prefix>
-            <el-icon class="el-input__icon"><Lock /></el-icon>
+            <el-icon class="el-input__icon">
+              <Lock/>
+            </el-icon>
           </template>
         </el-input>
       </el-form-item>
@@ -30,22 +36,26 @@
       <el-form-item prop="authorize" v-if="form.role==1">
         <el-input v-model="form.authorize" placeholder="请输入管理员注册码" clearable show-password>
           <template #prefix>
-            <el-icon class="el-input__icon"><Lock /></el-icon>
+            <el-icon class="el-input__icon">
+              <Lock/>
+            </el-icon>
           </template>
         </el-input>
       </el-form-item>
       <el-form-item>
         <div style="display: flex">
-          <el-input  v-model="form.validCode" style="width: 45%;" placeholder="请输入验证码"></el-input>
+          <el-input v-model="form.validCode" style="width: 45%;" placeholder="请输入验证码"></el-input>
           <ValidCode @input="createValidCode" style="width: 50%"/>
         </div>
       </el-form-item>
-      <el-form-item >
+      <el-form-item>
         <el-button type="primary" style=" width: 100%" @click="register">注 册</el-button>
       </el-form-item>
-      <el-form-item><el-button type="text" @click="$router.push('/login')">前往登录>> </el-button></el-form-item>
+      <el-form-item>
+        <el-button type="text" @click="$router.push('/login')">前往登录>></el-button>
+      </el-form-item>
     </el-form>
-</div>
+  </div>
 
 </template>
 
@@ -53,14 +63,15 @@
 import request from "../utils/request";
 import {ElMessage} from "element-plus";
 import ValidCode from "../components/Validate";
+
 export default {
   name: "Login",
-  components:{
+  components: {
     ValidCode
   },
-  data(){
-    return{
-      form:{},
+  data() {
+    return {
+      form: {},
       validCode: '',
       rules: {
         username: [
@@ -83,56 +94,53 @@ export default {
             trigger: 'blur',
           }
         ],
-      confirm:[
-        {
-          required:true,
-          message:"请确认密码",
-          trigger:"blur"
-        }
-      ],
-        authorize:[
+        confirm: [
           {
-            required:true,
-            message:"请输入注册码",
-            trigger:"blur"
+            required: true,
+            message: "请确认密码",
+            trigger: "blur"
+          }
+        ],
+        authorize: [
+          {
+            required: true,
+            message: "请输入注册码",
+            trigger: "blur"
           }
         ],
       }
     }
+  },
+  methods: {
+    createValidCode(data) {
+      this.validCode = data
     },
-
-  methods:{
-    createValidCode(data){
-      this.validCode =data
-    },
-    register(){
+    register() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
           if (!this.form.validCode) {
             ElMessage.error("请填写验证码")
             return
           }
-          if(this.form.validCode.toLowerCase() !== this.validCode.toLowerCase()) {
+          if (this.form.validCode.toLowerCase() !== this.validCode.toLowerCase()) {
             ElMessage.error("验证码错误")
             return
           }
-          if(this.form.password != this.form.confirm)
-          {
+          if (this.form.password != this.form.confirm) {
             ElMessage.error("两次密码输入不一致")
             return
           }
-          if(this.form.role == 1 && this.form.authorize != "1234")
-          {
+          if (this.form.role == 1 && this.form.authorize != "1234") {
             ElMessage.error("请输入正确的注册码")
             return
           }
-          request.post("user/register",this.form).then(res=>{
-            if(res.code == 0)
-            {
+          request.post("user/register", this.form).then(res => {
+            if (res.code == 0) {
               ElMessage.success("注册成功")
               this.$router.push("/login")
+            } else {
+              ElMessage.error(res.msg)
             }
-            else {ElMessage.error(res.msg)}
           })
         }
       })
@@ -140,7 +148,7 @@ export default {
     }
   }
 
-  }
+}
 
 </script>
 
@@ -152,6 +160,7 @@ export default {
   background: url('../img/bg2.svg');
   background-size: contain;
 }
+
 .login-page {
   border-radius: 5px;
   margin: 180px auto;

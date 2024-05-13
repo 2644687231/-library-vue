@@ -28,36 +28,25 @@ export default {
   data() {
     return {
       cards: [
-        { title: '已借阅', data: 100, icon: '#iconlend-record-pro' },
-        { title: '总访问', data: 100, icon: '#iconvisit'   },
-        { title: '图书数', data: 100, icon: '#iconbook-pro' },
-        { title: '用户数', data: 1000, icon: '#iconpopulation' }
+        {title: '已借阅', data: 100, icon: '#iconlend-record-pro'},
+        {title: '总访问', data: 100, icon: '#iconvisit'},
+        {title: '图书数', data: 100, icon: '#iconbook-pro'},
+        {title: '用户数', data: 1000, icon: '#iconpopulation'}
       ],
-      data:{}
+      data: {}
     }
-  },
-  created() {
-
   },
   mounted() {
     this.circleTimer()
-
-    request.get("/dashboard").then(res=>{
-      if(res.code == 0)
-      {
-
+    request.get("/dashboard").then(res => {
+      if (res.code == 0) {
         this.cards[0].data = res.data.lendRecordCount
         this.cards[1].data = res.data.visitCount
         this.cards[2].data = res.data.bookCount
         this.cards[3].data = res.data.userCount
-
-      }
-      else
-      {
+      } else {
         ElMessage.error(res.msg)
       }
-
-
       // 基于准备好的dom，初始化echarts实例
       var myChart = echarts.init(document.getElementById('main'))
       console.log(this.cards[0].data)
@@ -91,24 +80,24 @@ export default {
         series: [
           {
             type: 'bar',
-            label: { show: true },
+            label: {show: true},
             barWidth: '25%',
             data: [
               {
                 value: this.cards[0].data,
-                itemStyle: { color: '#5470c6' }
+                itemStyle: {color: '#5470c6'}
               },
               {
                 value: this.cards[1].data,
-                itemStyle: { color: '#91cc75' }
+                itemStyle: {color: '#91cc75'}
               },
               {
                 value: this.cards[2].data,
-                itemStyle: { color: '#fac858' }
+                itemStyle: {color: '#fac858'}
               },
               {
                 value: this.cards[3].data,
-                itemStyle: { color: '#ee6666' }
+                itemStyle: {color: '#ee6666'}
               }
             ]
           }
